@@ -14,5 +14,5 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     license='MIT',
     packages=['examl'],
-    install_requires=['pandas'],
+    install_requires=['pandas', 'openpyxl'],
 )
