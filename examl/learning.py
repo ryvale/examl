@@ -38,7 +38,7 @@ class StandardDataProcessor(DataProcessor):
     def execute(self, df: pd.DataFrame) -> pd.DataFrame:
 
         if not self.__uselessColumns is None:
-            df.drop(self.__uselessColumns, inplace=True)
+            df.drop(self.__uselessColumns, axis=1, inplace=True)
 
         if not self.__groubByConfig is None:
 
