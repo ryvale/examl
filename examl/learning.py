@@ -1,4 +1,4 @@
-from typing import Mapping, Sequence, dict, Iterable
+from typing import Mapping, Sequence, Dict, Iterable
 import pandas as pd
 
 class InputMan:
@@ -12,7 +12,7 @@ class DataProcessor:
         return df
 
 class AggConfig:
-    def __init__(self, gbColumns : Sequence[str], aggFuncConfig : dict):
+    def __init__(self, gbColumns : Sequence[str], aggFuncConfig : Dict):
         self.__gbColumns = gbColumns
         self.__aggFuncConfig = aggFuncConfig
         
