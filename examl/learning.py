@@ -1,4 +1,4 @@
-from typing import Callable, Mapping, Sequence, Dict, Iterable
+from typing import Mapping, Sequence, Dict, Iterable
 import pandas as pd
 
 class InputMan:
