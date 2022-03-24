@@ -1,4 +1,4 @@
-from typing import Mapping, Sequence, Dict, Iterable
+from typing import Callable, Mapping, Sequence, Dict, Iterable
 import pandas as pd
 
 class InputMan:
@@ -30,10 +30,12 @@ class AggConfig:
 
 class StandardDataProcessor(DataProcessor):
 
-    def __init__(self, uselessColumns : Iterable[str] = None, groubByConfig : AggConfig  = None, orderByColumns : Sequence[str] = None):
+    def __init__(self, uselessColumns : Iterable[str] = None, groubByConfig : AggConfig  = None, orderByColumns : Sequence[str] = None, newColumns : Mapping[str, Mapping[str, object]] = None):
         self.__uselessColumns = uselessColumns
         self.__groubByConfig = groubByConfig
         self.__orderByColumns = orderByColumns
+        self.__newColumns = newColumns
+
 
     def execute(self, df: pd.DataFrame) -> pd.DataFrame:
 
@@ -60,6 +62,17 @@ class StandardDataProcessor(DataProcessor):
             dfgb.columns = aggFieldNames
 
             df = dfgb.reset_index()
+
+        if not self.__newColumns is None:
+            for nc in self.__newColumns.keys():
+                ncConfig = self.__newColumns[nc]
+                ncProc = ncConfig['func']
+                df[nc] = ncProc(df)
+
+                if 'drop' in ncConfig.keys():
+                    df.drop(ncConfig['drop'], axis=1, inplace=True)
+
+            
 
         if not self.__orderByColumns is None:
             df.sort_values(self.__orderByColumns, inplace=True)
