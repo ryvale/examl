@@ -42,6 +42,15 @@ class StandardDataProcessor(DataProcessor):
         if not self.__uselessColumns is None:
             df.drop(self.__uselessColumns, axis=1, inplace=True)
 
+        if not self.__newColumns is None:
+            for nc in self.__newColumns.keys():
+                ncConfig = self.__newColumns[nc]
+                ncProc = ncConfig['func']
+                df[nc] = ncProc(df)
+
+                if 'drop' in ncConfig.keys():
+                    df.drop(ncConfig['drop'], axis=1, inplace=True)
+
         if not self.__groubByConfig is None:
 
             aggParams = {}
@@ -62,17 +71,6 @@ class StandardDataProcessor(DataProcessor):
             dfgb.columns = aggFieldNames
 
             df = dfgb.reset_index()
-
-        if not self.__newColumns is None:
-            for nc in self.__newColumns.keys():
-                ncConfig = self.__newColumns[nc]
-                ncProc = ncConfig['func']
-                df[nc] = ncProc(df)
-
-                if 'drop' in ncConfig.keys():
-                    df.drop(ncConfig['drop'], axis=1, inplace=True)
-
-            
 
         if not self.__orderByColumns is None:
             df.sort_values(self.__orderByColumns, inplace=True)
