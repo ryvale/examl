@@ -92,7 +92,6 @@ class StandardDataProcessor(DataProcessor):
                         fieldsPos=[]
                         aggFieldNames[fieldName] = fieldsPos
                        
-
                     if isinstance(aggFn, str):
                         aggParams[fieldName].append(aggFn)
                         fieldsPos.append(aggFn + "_" + fieldName)
