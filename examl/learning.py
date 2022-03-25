@@ -59,7 +59,9 @@ class StandardDataProcessor(DataProcessor):
             for gbConf in  self.__groubByConfig.aggFuncConfig:
 
                 for fieldName in gbConf.keys():
-                    aggParams[fieldName] = []
+                    if not fieldName in aggParams:
+                        aggParams[fieldName] = []
+                        
                     aggFn = gbConf[fieldName]
 
                     if isinstance(aggFn, str):
