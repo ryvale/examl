@@ -1,5 +1,6 @@
 from typing import Mapping, Sequence, Dict, Iterable
 import pandas as pd
+from collections import OrderedDict;
 
 class InputMan:
     def normalize(self) -> pd.DataFrame:
@@ -54,7 +55,7 @@ class StandardDataProcessor(DataProcessor):
         if not self.__groubByConfig is None:
 
             aggParams = {}
-            aggFieldNames = []
+            aggFieldNames = OrderedDict()
 
             for gbConf in  self.__groubByConfig.aggFuncConfig:
 
@@ -64,17 +65,26 @@ class StandardDataProcessor(DataProcessor):
 
                     aggFn = gbConf[fieldName]
 
+                    if fieldName in aggFieldNames.keys():
+                        fieldsPos = aggFieldNames[fieldName]
+                    else:
+                        fieldsPos=[]
+                        aggFieldNames[fieldName] = fieldsPos
+                       
+
                     if isinstance(aggFn, str):
                         aggParams[fieldName].append(aggFn)
-                        aggFieldNames.append(aggFn + "_" + fieldName)
+                        fieldsPos.append(aggFn + "_" + fieldName)
                     else:
                         aggParams[fieldName].append(aggFn[0])
-                        aggFieldNames.append(aggFn[1])
+                        fieldsPos.append(aggFn[1])
 
-            print(aggParams)
-            print(self.__groubByConfig.gbColumns)
+            fieldNames = []
+            for afn in aggFieldNames.keys():
+                fieldNames += aggFieldNames[afn]
+
             dfgb = df.groupby(self.__groubByConfig.gbColumns).agg(aggParams)
-            dfgb.columns = aggFieldNames
+            dfgb.columns = fieldNames
 
             df = dfgb.reset_index()
 
