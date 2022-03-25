@@ -61,7 +61,7 @@ class StandardDataProcessor(DataProcessor):
                 for fieldName in gbConf.keys():
                     if not fieldName in aggParams:
                         aggParams[fieldName] = []
-                        
+
                     aggFn = gbConf[fieldName]
 
                     if isinstance(aggFn, str):
@@ -71,6 +71,8 @@ class StandardDataProcessor(DataProcessor):
                         aggParams[fieldName].append(aggFn[0])
                         aggFieldNames.append(aggFn[1])
 
+            print(aggParams)
+            print(self.__groubByConfig.gbColumns)
             dfgb = df.groupby(self.__groubByConfig.gbColumns).agg(aggParams)
             dfgb.columns = aggFieldNames
 
