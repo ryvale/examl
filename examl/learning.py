@@ -31,11 +31,12 @@ class AggConfig:
 
 class StandardDataProcessor(DataProcessor):
 
-    def __init__(self, uselessColumns : Iterable[str] = None, groubByConfig : AggConfig  = None, orderByColumns : Sequence[str] = None, newColumns : Mapping[str, Mapping[str, object]] = None):
+    def __init__(self, uselessColumns : Iterable[str] = None, groubByConfig : AggConfig  = None, orderByColumns : Sequence[str] = None, newColumns : Mapping[str, Mapping[str, object]] = None, digitColumns : Mapping[str, Mapping[str, object]] = None):
         self.__uselessColumns = uselessColumns
         self.__groubByConfig = groubByConfig
         self.__orderByColumns = orderByColumns
         self.__newColumns = newColumns
+        self.__digitColumns = digitColumns
 
 
     def execute(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -51,6 +52,26 @@ class StandardDataProcessor(DataProcessor):
 
                 if 'drop' in ncConfig.keys():
                     df.drop(ncConfig['drop'], axis=1, inplace=True)
+
+        if not self.__digitColumns is None:
+            for colToDigitalize in self.__digitColumns.keys():
+                digitConfig = self.__digitColumns[colToDigitalize]
+                nbValue = digitConfig['nbValue']
+                if 'colNames' in digitConfig:
+                    colNames = digitConfig['colNames']
+                elif 'prefix'  in digitConfig:
+                    colNames = [digitConfig['prefix'] + "_" + i for i in range(1, nbValue+1)]
+                else:
+                    colNames = [colToDigitalize + "_" + i for i in range(1, nbValue+1)]
+
+                mapFunc = digitConfig['mapFunc']
+                for i in range(nbValue):
+                    df[colNames[i]] = df[colToDigitalize].map(lambda x : mapFunc(i, x))
+                
+                if 'drop' in digitConfig:
+                    if digitConfig['drop']:
+                        df.drop(ncConfig['drop'], axis=1, inplace=True)
+
 
         if not self.__groubByConfig is None:
 
