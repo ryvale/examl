@@ -12,7 +12,7 @@ class DataProcessor:
         return df
 
 class AggConfig:
-    def __init__(self, gbColumns : Sequence[str], aggFuncConfig : Dict):
+    def __init__(self, gbColumns : Sequence[str], aggFuncConfig : Sequence[Dict] ):
         self.__gbColumns = gbColumns
         self.__aggFuncConfig = aggFuncConfig
         
@@ -56,16 +56,18 @@ class StandardDataProcessor(DataProcessor):
             aggParams = {}
             aggFieldNames = []
 
-            for fieldName in self.__groubByConfig.aggFuncConfig.keys():
-                aggParams[fieldName] = []
-                aggFn = self.__groubByConfig.aggFuncConfig[fieldName]
+            for gbConf in  self.__groubByConfig.aggFuncConfig:
 
-                if isinstance(aggFn, str):
-                    aggParams[fieldName].append(aggFn)
-                    aggFieldNames.append(aggFn + "_" + fieldName)
-                else:
-                    aggParams[fieldName].append(aggFn[0])
-                    aggFieldNames.append(aggFn[1])
+                for fieldName in gbConf.keys():
+                    aggParams[fieldName] = []
+                    aggFn = gbConf[fieldName]
+
+                    if isinstance(aggFn, str):
+                        aggParams[fieldName].append(aggFn)
+                        aggFieldNames.append(aggFn + "_" + fieldName)
+                    else:
+                        aggParams[fieldName].append(aggFn[0])
+                        aggFieldNames.append(aggFn[1])
 
             dfgb = df.groupby(self.__groubByConfig.gbColumns).agg(aggParams)
             dfgb.columns = aggFieldNames
