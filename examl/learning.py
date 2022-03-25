@@ -60,9 +60,9 @@ class StandardDataProcessor(DataProcessor):
                 if 'colNames' in digitConfig:
                     colNames = digitConfig['colNames']
                 elif 'prefix'  in digitConfig:
-                    colNames = [digitConfig['prefix'] + "_" + i for i in range(1, nbValue+1)]
+                    colNames = [digitConfig['prefix'] + "_" + str(i) for i in range(1, nbValue+1)]
                 else:
-                    colNames = [colToDigitalize + "_" + i for i in range(1, nbValue+1)]
+                    colNames = [colToDigitalize + "_" + str(i) for i in range(1, nbValue+1)]
 
                 mapFunc = digitConfig['mapFunc']
                 for i in range(nbValue):
