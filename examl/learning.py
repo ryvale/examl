@@ -83,6 +83,9 @@ class StandardDataProcessor(DataProcessor):
             for afn in aggFieldNames.keys():
                 fieldNames += aggFieldNames[afn]
 
+            print(aggParams)
+            print(fieldNames)
+            
             dfgb = df.groupby(self.__groubByConfig.gbColumns).agg(aggParams)
             dfgb.columns = fieldNames
 
