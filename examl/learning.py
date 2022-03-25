@@ -76,15 +76,14 @@ class StandardDataProcessor(DataProcessor):
                         aggParams[fieldName].append(aggFn)
                         fieldsPos.append(aggFn + "_" + fieldName)
                     else:
-                        aggParams[fieldName].append(aggFn[0])
-                        fieldsPos.append(aggFn[1])
+                        aggParams[fieldName].append(aggFn['aggFn'])
+                        colName = aggFn['colName'] if 'colName' in aggFn.keys() else aggFn['aggFn'] + '_' + fieldName
+                        fieldsPos.append(colName)
 
             fieldNames = []
             for afn in aggFieldNames.keys():
                 fieldNames += aggFieldNames[afn]
 
-            print(aggParams)
-            print(fieldNames)
             
             dfgb = df.groupby(self.__groubByConfig.gbColumns).agg(aggParams)
             dfgb.columns = fieldNames
