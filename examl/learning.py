@@ -123,6 +123,21 @@ class StandardDataProcessor(DataProcessor):
 
         return df
 
+class MultiDFInputMan(InputMan):
+
+    def __init__(self, processor : DataProcessor, dfs : Iterable[pd.DataFrame]):
+         self.__processor = processor
+         self.__dfs = dfs
+
+    def normalize(self) -> pd.DataFrame:
+        dfArray = []
+
+        for df in self.__dfs:
+            processedDF = self.__processor.execute(df)
+            dfArray.append(processedDF)
+
+        return pd.concat(dfArray, ignore_index=True)
+
 
 class XLSFileInputMan(InputMan):
 
