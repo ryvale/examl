@@ -6,11 +6,19 @@ class InputMan:
     def normalize(self) -> pd.DataFrame:
         pass
 
-
 class DataProcessor:
     
     def execute(self, df: pd.DataFrame) -> pd.DataFrame:
         return df
+
+
+class StandardInputMan(InputMan):
+
+    def __init__(self, processor : DataProcessor):
+        self.__processor = processor
+        
+    def execute(self, df: pd.DataFrame) -> pd.DataFrame:
+        return self.__processor.execute(df)
 
 class AggConfig:
     def __init__(self, gbColumns : Sequence[str], aggFuncConfig : Sequence[Dict] ):
