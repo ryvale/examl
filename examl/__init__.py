@@ -1,1 +1,2 @@
-from .learning import InputMan, DataProcessor, StandardDataProcessor, Learner
+from .processors import DataProcessor, StandardDataProcessor
+from .learning import InputMan, Learner, InputManDataFrames
