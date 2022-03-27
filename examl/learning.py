@@ -81,7 +81,7 @@ class SupervisedLearner:
         for imDF in imDFs:
             print(f'Data processor : {imDF.name}')
             print(imDF.df.head())
-            
+
             xTrain, yTrain = self.__prepareForLearning(imDF.df, targetCol)
 
             tDF = testDF.copy()
@@ -97,6 +97,8 @@ class SupervisedLearner:
             regressionDict = OrderedDict()
             procProps['regressors'] = regressionDict
             for rk in self.__regressors.keys():
+                print(f'Regressor : {rk}')
+
                 regressor = self.__regressors[rk]()
                 regressor.fit(xTrain, yTrain)
 
@@ -115,6 +117,8 @@ class SupervisedLearner:
                     evalRes = em(yTest, yTestPred)
 
                     metricsResDict[emk] = evalRes
+
+                    print(f'evaluator {emk} score :', evalRes)
                     
                     
         return res
