@@ -1,7 +1,5 @@
-from typing import Mapping, Sequence, Dict, Iterable
+from typing import Mapping, OrderedDict, Sequence, Dict, Iterable
 import pandas as pd
-from collections import OrderedDict;
-
 
 class AggConfig:
     def __init__(self, gbColumns : Sequence[str], aggFuncConfig : Sequence[Dict] ):
