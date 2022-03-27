@@ -105,7 +105,7 @@ class SupervisedLearner:
                 regressionDict[rk] = regProps
                 
                 metricsResDict = OrderedDict()
-                regProps['evaluators'] = metricsResDict
+                regProps['scoring'] = metricsResDict
                 for emk in self.__evalMetrics.keys():
                     em = self.__evalMetrics[emk]
 
