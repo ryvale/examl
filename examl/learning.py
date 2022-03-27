@@ -78,7 +78,6 @@ class SupervisedLearner:
         res['trainset'] = trainDF
         res['testset'] = testDF
         
-
         imDFs = InputManDataFrames(trainDF, self.__dataProcessors)
 
         processors = OrderedDict()
@@ -96,15 +95,17 @@ class SupervisedLearner:
             xTest, yTest = self.__prepareForLearning(tDF, targetCol)
 
             procProps = OrderedDict()
-            procProps["trainShape"] =  xTrain.shape
-            procProps["testShape"] =  xTest.shape
+            procProps["xTrain"] =  xTrain
+            procProps["yTrain"] =  yTrain
+
+            procProps["xTest"] =  xTest
+            procProps["yTest"] =  yTest
 
             processors[imDF.name] = procProps
 
             regressionDict = OrderedDict()
             procProps['regressors'] = regressionDict
             for rk in self.__regressors.keys():
-                #print(f'Regressor : {rk}')
 
                 regressor = self.__regressors[rk]()
                 regressor.fit(xTrain, yTrain)
@@ -113,6 +114,7 @@ class SupervisedLearner:
 
                 regProps = OrderedDict()
                 regProps['model'] = regressor
+                regProps['pred'] = yTestPred
 
                 regressionDict[rk] = regProps
                 
@@ -121,11 +123,10 @@ class SupervisedLearner:
                 for emk in self.__evalMetrics.keys():
                     em = self.__evalMetrics[emk]
 
-                    evalRes = em(yTest, yTestPred)
+                    testScore = em(yTest, yTestPred)
 
-                    metricsResDict[emk] = evalRes
+                    metricsResDict[emk] = testScore
 
-                    #print(f'{emk} score :', evalRes)
                     
                     
         return res
