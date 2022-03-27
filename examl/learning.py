@@ -79,6 +79,9 @@ class SupervisedLearner:
         imDFs = InputManDataFrames(trainDF, self.__dataProcessors)
 
         for imDF in imDFs:
+            print(f'Data processor : {imDF.name}')
+            print(imDF.df.head())
+            
             xTrain, yTrain = self.__prepareForLearning(imDF.df, targetCol)
 
             tDF = testDF.copy()
@@ -111,10 +114,7 @@ class SupervisedLearner:
 
                     evalRes = em(yTest, yTestPred)
 
-                    emProps = OrderedDict()
-                    emProps['result'] = evalRes
-
-                    metricsResDict[emk] = emProps
+                    metricsResDict[emk] = evalRes
                     
                     
         return res
