@@ -159,7 +159,7 @@ class InputManIterator:
 
     def __next__(self):
 
-        k = next[self.__index]
+        k = next(self.__index)
 
         processor =  self.__inputManDFs._processors[k]
 
