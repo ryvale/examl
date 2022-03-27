@@ -1,6 +1,6 @@
 from typing import Callable, Mapping, Iterable, OrderedDict
 import pandas as pd
-from processors import DataProcessor
+from .processors import DataProcessor
 
 from sklearn.model_selection import train_test_split
 
