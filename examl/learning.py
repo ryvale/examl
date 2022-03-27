@@ -153,21 +153,20 @@ class InputManIterator:
 
     def __init__(self, inputManDFs : InputManDataFrames):
         self.__inputManDFs = inputManDFs
-        self.__keys = inputManDFs._processors.keys()
-        self.__index = 0
+        keys = inputManDFs._processors.keys()
+        self.__index = iter(keys)
 
 
     def __next__(self):
-        if self.__index < len(self.__keys):
-            k = self.__keys[self.__index]
-            processor =  self.__inputManDFs._processors[k]
 
-            df = self.__inputManDFs._df.copy()
+        k = next[self.__index]
 
-            df = processor.execute(df)
+        processor =  self.__inputManDFs._processors[k]
 
-            self.__index +=1
+        df = self.__inputManDFs._df.copy()
 
-            return InputManDataFrame(k, df, processor)
-        
-        raise StopIteration
+        df = processor.execute(df)
+
+        self.__index +=1
+
+        return InputManDataFrame(k, df, processor)
