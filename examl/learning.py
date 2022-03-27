@@ -118,7 +118,7 @@ class SupervisedLearner:
 
                     metricsResDict[emk] = evalRes
 
-                    print(f'evaluator {emk} score :', evalRes)
+                    print(f'{emk} score :', evalRes)
                     
                     
         return res
