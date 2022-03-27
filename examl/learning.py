@@ -1,6 +1,8 @@
-from typing import Mapping, Iterable, Sequence
+from typing import Callable, Mapping, Iterable, OrderedDict
 import pandas as pd
 from processors import DataProcessor
+
+from sklearn.model_selection import train_test_split
 
 class InputMan:
     def normalize(self) -> pd.DataFrame:
@@ -55,15 +57,92 @@ class XLSFileInputMan(InputMan):
 
         return pd.concat(sheetDataArray, ignore_index=True)
 
+class SupervisedLearner:
 
-class Learner:
+    def __init__(self, dataProcessors : Mapping[str, DataProcessor], regressors : Mapping[str, Callable[[], object]], evalMetrics : Mapping[str, Callable[[object, object], object]]):
+        self.__dataProcessors = dataProcessors
+        self.__regressors = regressors
+        self.__evalMetrics = evalMetrics
 
-    def process(self, inputMan : InputMan):
-        normalizedInput = inputMan.normalize()
+    def __prepareForLearning(self, df : pd.DataFrame, targetCol : str):
+        x = df.drop(targetCol, axis = 1)
+        y = df[targetCol]
+
+        return x, y
+
+    def acquireKnowledge(self, df : pd.DataFrame, targetCol : str, testSize = 0.2, ramdomState = None):
+
+        trainDF, testDF = train_test_split(df, test_size = testSize, random_state=ramdomState)
+
+        res = OrderedDict()
+
+        imDFs = InputManDataFrames(trainDF, self.__dataProcessors)
+
+        for imDF in imDFs:
+            xTrain, yTrain = self.__prepareForLearning(imDF.df, targetCol)
+
+            tDF = testDF.copy()
+            tDF = imDF.processor.execute(tDF)
+            xTest, yTest = self.__prepareForLearning(tDF, targetCol)
+
+            procProps = OrderedDict()
+            procProps["trainShape"] =  xTrain.shape
+            procProps["testShape"] =  xTest.shape
+
+            res[imDF.name] = procProps
+
+            regressionDict = OrderedDict()
+            procProps['regressors'] = regressionDict
+            for rk in self.__regressors.keys:
+                regressor = self.__regressors[rk]()
+                regressor.fit(xTrain, yTrain)
+
+                yTestPred = regressor.predict(xTest)
+
+                regProps = OrderedDict()
+                regProps['model'] = regressor
+
+                regressionDict[rk] = regProps
+                
+                metricsResDict = OrderedDict()
+                regProps['evaluators'] = metricsResDict
+                for emk in self.__evalMetrics.keys():
+                    em = self.__evalMetrics[emk]
+
+                    evalRes = em(yTest, yTestPred)
+
+                    emProps = OrderedDict()
+                    emProps['result'] = evalRes
+
+                    metricsResDict[emk] = emProps
+                    
+                    
+        return res
         
+class InputManDataFrame:
+
+    def __init__(self, name : str, df : pd.DataFrame, processor : DataProcessor):
+        self.__df = df
+        self.__name = name
+        self.__processor = processor
+
+    def __get_df(self):
+        return self.__df
+
+    def __get_name(self):
+        return self.__name
+
+    def __get_processor(self):
+        return self.__processor
+
+    df = property(__get_df)
+    name = property(__get_name)
+    processor = property(__get_processor)
+
+
 class InputManDataFrames:
 
-    def __init__(self, df : pd.DataFrame, processors : Sequence[DataProcessor]):
+    def __init__(self, df : pd.DataFrame, processors : Mapping[str, DataProcessor]):
         self._df = df
         self._processors = processors
 
@@ -74,17 +153,21 @@ class InputManIterator:
 
     def __init__(self, inputManDFs : InputManDataFrames):
         self.__inputManDFs = inputManDFs
+        self.__keys = inputManDFs._processors.keys()
         self.__index = 0
 
 
     def __next__(self):
-        if self.__index < len(self.__inputManDFs._processors):
-            processor =  self.__inputManDFs._processors[self.__index]
+        if self.__index < len(self.__keys):
+            k = self.__keys[self.__index]
+            processor =  self.__inputManDFs._processors[k]
 
-            res = processor.execute(self.__inputManDFs._df)
+            df = self.__inputManDFs._df.copy()
+
+            df = processor.execute(df)
 
             self.__index +=1
 
-            return res
+            return InputManDataFrame(k, df, processor)
         
         raise StopIteration
