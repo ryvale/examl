@@ -58,8 +58,14 @@ class StandardDataProcessor(DataProcessor):
                     colNames = [colToDigitalize + "_" + str(i) for i in range(1, nbValue+1)]
 
                 mapFunc = digitConfig['mapFunc']
+                newColDFs = [df]
                 for i in range(nbValue):
-                    df[colNames[i]] = df[colToDigitalize].map(lambda x : mapFunc(i, x))
+                    ndf = df[colToDigitalize].map(lambda x : mapFunc(i, x))
+                    ndf.name = colNames[i]
+                    newColDFs.append(ndf)
+
+                df = pd.concat(newColDFs, axis=1)
+                    #df[colNames[i]] = df[colToDigitalize].map(lambda x : mapFunc(i, x))
                 
                 if 'drop' in digitConfig:
                     if digitConfig['drop']:
