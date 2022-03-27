@@ -93,7 +93,7 @@ class SupervisedLearner:
 
             regressionDict = OrderedDict()
             procProps['regressors'] = regressionDict
-            for rk in self.__regressors.keys:
+            for rk in self.__regressors.keys():
                 regressor = self.__regressors[rk]()
                 regressor.fit(xTrain, yTrain)
 
