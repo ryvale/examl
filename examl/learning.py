@@ -71,16 +71,23 @@ class SupervisedLearner:
         return x, y
 
     def acquireKnowledge(self, df : pd.DataFrame, targetCol : str, testSize = 0.2, ramdomState = None):
+        res = OrderedDict()
 
         trainDF, testDF = train_test_split(df, test_size = testSize, random_state=ramdomState)
 
-        res = OrderedDict()
+        res['trainset'] = trainDF
+        res['testset'] = testDF
+        
 
         imDFs = InputManDataFrames(trainDF, self.__dataProcessors)
 
+        processors = OrderedDict()
+
+        res['processors'] = processors
+
         for imDF in imDFs:
-            print(f'Data processor : {imDF.name}')
-            print(imDF.df.head())
+            #print(f'Data processor : {imDF.name}')
+            #print(imDF.df.head())
 
             xTrain, yTrain = self.__prepareForLearning(imDF.df, targetCol)
 
@@ -92,12 +99,12 @@ class SupervisedLearner:
             procProps["trainShape"] =  xTrain.shape
             procProps["testShape"] =  xTest.shape
 
-            res[imDF.name] = procProps
+            processors[imDF.name] = procProps
 
             regressionDict = OrderedDict()
             procProps['regressors'] = regressionDict
             for rk in self.__regressors.keys():
-                print(f'Regressor : {rk}')
+                #print(f'Regressor : {rk}')
 
                 regressor = self.__regressors[rk]()
                 regressor.fit(xTrain, yTrain)
@@ -118,7 +125,7 @@ class SupervisedLearner:
 
                     metricsResDict[emk] = evalRes
 
-                    print(f'{emk} score :', evalRes)
+                    #print(f'{emk} score :', evalRes)
                     
                     
         return res
