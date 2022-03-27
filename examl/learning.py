@@ -167,6 +167,4 @@ class InputManIterator:
 
         df = processor.execute(df)
 
-        self.__index +=1
-
         return InputManDataFrame(k, df, processor)
