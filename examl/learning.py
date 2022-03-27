@@ -70,8 +70,11 @@ class SupervisedLearner:
 
         return x, y
 
-    def acquireKnowledge(self, df : pd.DataFrame, targetCol : str, testSize = 0.2, ramdomState = None):
+    def acquireKnowledge(self, df : pd.DataFrame, targetCol : str, testSize = 0.2, firstDataProcessor : DataProcessor = None, ramdomState = None):
         res = OrderedDict()
+
+        if not firstDataProcessor is None:
+            df = firstDataProcessor.execute(df)
 
         trainDF, testDF = train_test_split(df, test_size = testSize, random_state=ramdomState)
 
