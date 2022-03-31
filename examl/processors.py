@@ -1,5 +1,7 @@
-from typing import Mapping, OrderedDict, Sequence, Dict, Iterable
+from typing import Callable, Mapping, OrderedDict, Sequence, Dict, Iterable
 import pandas as pd
+
+from sklearn.preprocessing import PolynomialFeatures
 
 class AggConfig:
     def __init__(self, gbColumns : Sequence[str], aggFuncConfig : Sequence[Dict] ):
@@ -24,12 +26,13 @@ class DataProcessor:
 
 class StandardDataProcessor(DataProcessor):
 
-    def __init__(self, uselessColumns : Iterable[str] = None, groubByConfig : AggConfig  = None, orderByColumns : Sequence[str] = None, newColumns : Mapping[str, Mapping[str, object]] = None, digitColumns : Mapping[str, Mapping[str, object]] = None):
+    def __init__(self, uselessColumns : Iterable[str] = None, groubByConfig : AggConfig  = None, orderByColumns : Sequence[str] = None, newColumns : Mapping[str, Mapping[str, object]] = None, digitColumns : Mapping[str, Mapping[str, object]] = None, excludeRows : Iterable[Callable[[pd.DataFrame], object]] = None):
         self.__uselessColumns = uselessColumns
         self.__groubByConfig = groubByConfig
         self.__orderByColumns = orderByColumns
         self.__newColumns = newColumns
         self.__digitColumns = digitColumns
+        self.__excludeRows = excludeRows
 
 
     def execute(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -109,8 +112,21 @@ class StandardDataProcessor(DataProcessor):
 
             df = dfgb.reset_index()
 
+        if not self.__excludeRows is None:
+            
+            condition = None
+            for cnd in self.__excludeRows:
+                if condition is None:
+                    condition = cnd(df)
+                else:
+                    condition |= cnd(df)
+
+            if not condition is None: df.drop(df[condition].index, axis=0, inplace=True)
+
         if not self.__orderByColumns is None:
             df.sort_values(self.__orderByColumns, inplace=True)
+
+        
 
         return df
 
