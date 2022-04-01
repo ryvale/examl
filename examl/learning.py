@@ -70,7 +70,7 @@ class SupervisedLearner:
 
         return x, y
 
-    def __return(self, cb : Callable[[str, object]], step: str, data : object):
+    def __return(self, cb : Callable[[str, object], object], step: str, data : object):
         if cb is None: return
 
         cb(step, data)
