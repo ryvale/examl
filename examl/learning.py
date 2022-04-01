@@ -75,7 +75,7 @@ class SupervisedLearner:
 
         cb(step, data)
 
-    def acquireKnowledge(self, df : pd.DataFrame, targetCol : str, testSize = 0.2, firstDataProcessor : DataProcessor = None, ramdomState = None, getTempData : Callable[[str, object]] = None):
+    def acquireKnowledge(self, df : pd.DataFrame, targetCol : str, testSize = 0.2, firstDataProcessor : DataProcessor = None, ramdomState = None, getTempData : Callable[[str, object], object] = None):
         res = OrderedDict()
 
         if not firstDataProcessor is None:
