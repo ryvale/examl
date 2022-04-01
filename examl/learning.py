@@ -70,7 +70,12 @@ class SupervisedLearner:
 
         return x, y
 
-    def acquireKnowledge(self, df : pd.DataFrame, targetCol : str, testSize = 0.2, firstDataProcessor : DataProcessor = None, ramdomState = None):
+    def __return(self, cb : Callable[[str, object]], step: str, data : object):
+        if cb is None: return
+
+        cb(step, data)
+
+    def acquireKnowledge(self, df : pd.DataFrame, targetCol : str, testSize = 0.2, firstDataProcessor : DataProcessor = None, ramdomState = None, getTempData : Callable[[str, object]] = None):
         res = OrderedDict()
 
         if not firstDataProcessor is None:
@@ -78,8 +83,8 @@ class SupervisedLearner:
 
         trainDF, testDF = train_test_split(df, test_size = testSize, random_state=ramdomState)
 
-        res['trainset'] = trainDF
-        res['testset'] = testDF
+        self.__return(getTempData, "trainset", trainDF)
+        self.__return(getTempData, "testset", testDF)
         
         imDFs = InputManDataFrames(trainDF, self.__dataProcessors)
 
@@ -98,11 +103,11 @@ class SupervisedLearner:
             xTest, yTest = self.__prepareForLearning(tDF, targetCol)
 
             procProps = OrderedDict()
-            procProps["xTrain"] =  xTrain
-            procProps["yTrain"] =  yTrain
+            self.__return(getTempData, imDF.name + "_xTrain", xTrain)
+            self.__return(getTempData, imDF.name + "_yTrain", yTrain)
 
-            procProps["xTest"] =  xTest
-            procProps["yTest"] =  yTest
+            self.__return(getTempData, imDF.name + "_xTest", xTest)
+            self.__return(getTempData, imDF.name + "_yTest", yTest)
 
             processors[imDF.name] = procProps
 
@@ -117,7 +122,9 @@ class SupervisedLearner:
 
                 regProps = OrderedDict()
                 regProps['model'] = regressor
-                regProps['pred'] = yTestPred
+
+                self.__return(getTempData, imDF.name + "_" + rk + "_pred", yTestPred)
+                #regProps['pred'] = yTestPred
 
                 regressionDict[rk] = regProps
                 
