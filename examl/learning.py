@@ -137,12 +137,13 @@ class SupervisedLearner:
 
                     testMetricsResDict[emk] = testScore
 
+                yPred = regressor.predict(xTrain)
                 trainMetricsResDict = OrderedDict()
                 regProps['scoring-train'] = trainMetricsResDict
                 for emk in self.__evalMetrics.keys():
                     em = self.__evalMetrics[emk]
 
-                    testScore = em(yTrain, xTrain)
+                    testScore = em(yTrain, yPred)
 
                     trainMetricsResDict[emk] = testScore
 
