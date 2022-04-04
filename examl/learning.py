@@ -128,14 +128,24 @@ class SupervisedLearner:
 
                 regressionDict[rk] = regProps
                 
-                metricsResDict = OrderedDict()
-                regProps['scoring'] = metricsResDict
+                testMetricsResDict = OrderedDict()
+                regProps['scoring-test'] = testMetricsResDict
                 for emk in self.__evalMetrics.keys():
                     em = self.__evalMetrics[emk]
 
                     testScore = em(yTest, yTestPred)
 
-                    metricsResDict[emk] = testScore
+                    testMetricsResDict[emk] = testScore
+
+                trainMetricsResDict = OrderedDict()
+                regProps['scoring-train'] = trainMetricsResDict
+                for emk in self.__evalMetrics.keys():
+                    em = self.__evalMetrics[emk]
+
+                    testScore = em(yTrain, xTrain)
+
+                    trainMetricsResDict[emk] = testScore
+
 
                     
                     

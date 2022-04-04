@@ -1,7 +1,6 @@
 from typing import Callable, Mapping, OrderedDict, Sequence, Dict, Iterable
 import pandas as pd
-
-from sklearn.preprocessing import PolynomialFeatures
+from pandas import DataFrame
 
 class AggConfig:
     def __init__(self, gbColumns : Sequence[str], aggFuncConfig : Sequence[Dict] ):
@@ -21,7 +20,7 @@ class AggConfig:
 
 class DataProcessor:
     
-    def execute(self, df: pd.DataFrame) -> pd.DataFrame:
+    def execute(self, df: DataFrame) -> DataFrame:
         return df
 
 class StandardDataProcessor(DataProcessor):
@@ -35,7 +34,7 @@ class StandardDataProcessor(DataProcessor):
         self.__excludeRows = excludeRows
 
 
-    def execute(self, df: pd.DataFrame) -> pd.DataFrame:
+    def execute(self, df: DataFrame) -> DataFrame:
 
         if not self.__uselessColumns is None:
             df.drop(self.__uselessColumns, axis=1, inplace=True)
