@@ -152,24 +152,21 @@ class SupervisedLearner:
 
     def __learningReportParams(self, knowledge : Mapping[str, object]):
         processors = knowledge['processors']
-        nbProc = len(processors)
+        
+        key0 = next( iter(processors.keys()))
 
-        procKeys = processors.keys()
-        firstRegKeys = processors[procKeys[0]]['regressors'].keys()
+        regKey0 = next(iter(processors[key0]['regressors'].keys()))
 
-        nbReg = len(processors[procKeys[0]]['regressors'])
-        oneReg = processors[procKeys[0]]['regressors'][firstRegKeys[0]]
-
-        #nbEval = len(oneReg['scoring-train'])
+        nbReg = len(processors[key0]['regressors'])
+        oneReg = processors[key0]['regressors'][regKey0]
 
         evalMetricsKeys = oneReg['scoring-train'].keys()
 
-        #nbRow = nbProc * nbReg
         aProc = []
         aReg = []
         aScore = dict()
 
-        for pk in procKeys:
+        for pk in processors.keys():
             proc = processors[pk]
             aProc += [pk for i in range(nbReg)]
 
