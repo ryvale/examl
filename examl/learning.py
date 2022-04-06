@@ -209,6 +209,8 @@ class SupervisedLearner:
             knowledgeParams = self.__learningReportParams(knowledge)
 
             initProcs += [ip for i in range(len(knowledgeParams[0]))]
+            procs += knowledgeParams[0]
+            regs += knowledgeParams[1]
 
             evalMetricsKeys = knowledgeParams[3]
 
