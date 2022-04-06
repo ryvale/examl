@@ -126,7 +126,7 @@ class SupervisedLearner:
 
                 regressionDict[rk] = regProps
 
-                regProps['natif-test-score'] = regressor.score(yTest, yTestPred)
+                regProps['natif-test-score'] = regressor.score(xTest, yTest)
                 
                 testMetricsResDict = OrderedDict()
                 regProps['scoring-test'] = testMetricsResDict
