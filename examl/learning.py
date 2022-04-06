@@ -1,8 +1,9 @@
 from typing import Callable, Mapping, Iterable, OrderedDict
 import pandas as pd
+from pandas import DataFrame
 from .processors import DataProcessor
 
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, GridSearchCV
 
 class InputMan:
     def normalize(self) -> pd.DataFrame:
@@ -12,16 +13,16 @@ class StandardInputMan(InputMan):
     def __init__(self, processor : DataProcessor):
         self.__processor = processor
         
-    def execute(self, df: pd.DataFrame) -> pd.DataFrame:
+    def execute(self, df: DataFrame) -> DataFrame:
         return self.__processor.execute(df)
 
 class MultiDFInputMan(InputMan):
 
-    def __init__(self, processor : DataProcessor, dfs : Iterable[pd.DataFrame]):
+    def __init__(self, processor : DataProcessor, dfs : Iterable[DataFrame]):
          self.__processor = processor
          self.__dfs = dfs
 
-    def normalize(self) -> pd.DataFrame:
+    def normalize(self) -> DataFrame:
         dfArray = []
 
         for df in self.__dfs:
@@ -38,11 +39,11 @@ class XLSFileInputMan(InputMan):
         self.__file = file
         self.__processor = processor
 
-    def loadSheet(self, sheet_name : str) -> pd.DataFrame:
+    def loadSheet(self, sheet_name : str) -> DataFrame:
         return pd.read_excel(self.__file, sheet_name = sheet_name)
         
 
-    def normalize(self) -> pd.DataFrame:
+    def normalize(self) -> DataFrame:
         sheetDataArray = []
 
         for sheet_name in self.__processor.keys():
@@ -75,7 +76,8 @@ class SupervisedLearner:
 
         cb(step, data)
 
-    def acquireKnowledge(self, df : pd.DataFrame, targetCol : str, testSize = 0.2, firstDataProcessor : DataProcessor = None, ramdomState = None, getTempData : Callable[[str, object], object] = None):
+    def acquireKnowledge(self, df : pd.DataFrame, targetCol : str, testSize = 0.2, firstDataProcessor : DataProcessor = None, 
+        ramdomState = None, getTempData : Callable[[str, object], object] = None, trainMetrics : bool = False):
         res = OrderedDict()
 
         if not firstDataProcessor is None:
@@ -93,9 +95,6 @@ class SupervisedLearner:
         res['processors'] = processors
 
         for imDF in imDFs:
-            #print(f'Data processor : {imDF.name}')
-            #print(imDF.df.head())
-
             xTrain, yTrain = self.__prepareForLearning(imDF.df, targetCol)
 
             tDF = testDF.copy()
@@ -124,9 +123,10 @@ class SupervisedLearner:
                 regProps['model'] = regressor
 
                 self.__return(getTempData, imDF.name + "_" + rk + "_pred", yTestPred)
-                #regProps['pred'] = yTestPred
 
                 regressionDict[rk] = regProps
+
+                regProps['natif-test-score'] = regressor.score(yTest, yTestPred)
                 
                 testMetricsResDict = OrderedDict()
                 regProps['scoring-test'] = testMetricsResDict
@@ -137,20 +137,129 @@ class SupervisedLearner:
 
                     testMetricsResDict[emk] = testScore
 
-                yPred = regressor.predict(xTrain)
-                trainMetricsResDict = OrderedDict()
-                regProps['scoring-train'] = trainMetricsResDict
-                for emk in self.__evalMetrics.keys():
-                    em = self.__evalMetrics[emk]
+                if trainMetrics:
+                    yTrainPred = regressor.predict(xTrain)
+                    trainMetricsResDict = OrderedDict()
+                    regProps['scoring-train'] = trainMetricsResDict
+                    for emk in self.__evalMetrics.keys():
+                        em = self.__evalMetrics[emk]
 
-                    testScore = em(yTrain, yPred)
+                        testScore = em(yTrain, yTrainPred)
 
-                    trainMetricsResDict[emk] = testScore
+                        trainMetricsResDict[emk] = testScore
 
-
-                    
-                    
         return res
+
+    def __learningReportParams(self, knowledge : Mapping[str, object]):
+        processors = knowledge['processors']
+        nbProc = len(processors)
+
+        procKeys = processors.keys()
+        firstRegKeys = processors[procKeys[0]]['regressors'].keys()
+
+        nbReg = len(processors[procKeys[0]]['regressors'])
+        oneReg = processors[procKeys[0]]['regressors'][firstRegKeys[0]]
+
+        #nbEval = len(oneReg['scoring-train'])
+
+        evalMetricsKeys = oneReg['scoring-train'].keys()
+
+        #nbRow = nbProc * nbReg
+        aProc = []
+        aReg = []
+        aScore = dict()
+
+        for pk in procKeys:
+            proc = processors[pk]
+            aProc += [pk for i in range(nbReg)]
+
+            for rk in proc['regressors'].keys():
+                aReg.append(rk)
+                reg = proc['regressors'][rk]
+
+                for sk in evalMetricsKeys:
+                    trainSK = "Train-" + sk
+
+                    if trainSK in aScore.keys():
+                        trainScores = aScore[trainSK]
+                    else:
+                        trainScores = []
+                        aScore[trainSK] = trainScores
+
+                    trainScores.append(reg['scoring-train'][sk])
+
+                    testSK = "Test-" + sk
+                    if testSK in aScore.keys():
+                        testScores = aScore[testSK]
+                    else:
+                        testScores = []
+                        aScore[testSK] = testScores
+                        
+                    testScores.append( reg['scoring-test'][sk])                      
+
+        return aProc, aReg, aScore, evalMetricsKeys
+
+
+    def generateReport(self, knowledgeCollection : Mapping[str, object], order) -> DataFrame:
+        initProcs = []
+        procs = []
+        regs = []
+
+        evals = OrderedDict()
+
+        for ip in  knowledgeCollection.keys():
+            knowledge = knowledgeCollection[ip]
+            knowledgeParams = self.__learningReportParams(knowledge)
+
+            initProcs += [ip for i in range(len(knowledgeParams[0]))]
+
+            evalMetricsKeys = knowledgeParams[3]
+
+            for ek in evalMetricsKeys:
+                trainEK = "Train-" + ek
+                if trainEK in evals.keys():
+                    trScores = evals[trainEK]
+                else:
+                    trScores = []
+                trScores += knowledgeParams[2][trainEK]
+                evals[trainEK] = trScores
+
+            for ek in evalMetricsKeys:
+                testEK = "Test-" + ek
+                if testEK in evals.keys():
+                    teScores = evals[testEK]
+                else:
+                    teScores = []
+                teScores += knowledgeParams[2][testEK]
+                evals[testEK] = teScores
+
+        data = {'Collection name' : initProcs, 'Processors' : procs, 'Regressor' : regs}
+
+        for ek in evals.keys():
+            data[ek] = evals[ek]
+
+        regReportDF = DataFrame(data).sort_values(order, ascending=False)
+
+        return regReportDF
+        
+        
+
+    def optimize(estimator : Callable[[], object], tunedParameters, x, y, scoring : Iterable[str]):
+
+        res = OrderedDict()
+        for s in scoring:
+            gscv = GridSearchCV(estimator(), tunedParameters, scoring=s)
+            gscv.fit(x, y)
+
+            params =  dict()
+
+            params['best-params'] = gscv.best_params_
+            params['cv-results'] = gscv.cv_results_
+
+            res[s] = params
+        return res
+
+
         
 class InputManDataFrame:
 
