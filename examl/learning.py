@@ -160,7 +160,7 @@ class SupervisedLearner:
         nbReg = len(processors[key0]['regressors'])
         oneReg = processors[key0]['regressors'][regKey0]
 
-        evalMetricsKeys = oneReg['scoring-train'].keys()
+        evalMetricsKeys = [k for k in oneReg['scoring-train'].keys()]
 
         aProc = []
         aReg = []
