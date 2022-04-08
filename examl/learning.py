@@ -77,7 +77,7 @@ class SupervisedLearner:
         cb(step, data)
 
     def acquireKnowledge(self, df : pd.DataFrame, targetCol : str, testSize = 0.2, firstDataProcessor : DataProcessor = None, 
-        ramdomState = None, getTempData : Callable[[str, object], object] = None, trainMetrics : bool = False):
+        ramdomState = None, getTempData : Callable[[str, object], object] = None, trainMetrics : bool = False, exccludeRegressors : Iterable[object] = []):
         res = OrderedDict()
 
         if not firstDataProcessor is None:
@@ -113,6 +113,8 @@ class SupervisedLearner:
             regressionDict = OrderedDict()
             procProps['regressors'] = regressionDict
             for rk in self.__regressors.keys():
+
+                if rk in exccludeRegressors: continue
 
                 regressor = self.__regressors[rk]()
                 regressor.fit(xTrain, yTrain)
