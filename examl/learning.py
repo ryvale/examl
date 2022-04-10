@@ -127,14 +127,14 @@ class SupervisedLearner:
                     self.__return(getTempData, f"LOG:'{rk}' Regressor skip")
                     continue
 
-                self.__return(getTempData, f"LOG:'{rk}' Regression starts ...")
+                self.__return(getTempData, f"LOG:'{rk}' Regression process starts ...")
                 regressor = self.__regressors[rk]()
                 regressor.fit(xTrain, yTrain)
-                self.__return(getTempData, f"LOG:'{rk}' Regression ended")
+                self.__return(getTempData, "LOG:Regression completed (fit)")
 
-                self.__return(getTempData, f"LOG:'{rk}' Regressor test predictions starts ...")
+                #self.__return(getTempData, f"LOG:'{rk}' Regressor test predictions starts ...")
                 yTestPred = regressor.predict(xTest)
-                self.__return(getTempData, f"LOG:'{rk}' Regressor test predictions ended")
+                #self.__return(getTempData, f"LOG:'{rk}' Regressor test predictions ended")
 
                 regProps = OrderedDict()
                 regProps['model'] = regressor
@@ -143,12 +143,12 @@ class SupervisedLearner:
 
                 regressionDict[rk] = regProps
 
-                self.__return(getTempData, f"LOG:Getting '{rk}' Regressor test score ...")
+                #self.__return(getTempData, f"LOG:Getting '{rk}' Regressor test score ...")
                 natifScore = regressor.score(xTest, yTest)
                 regProps['natif-test-score'] = natifScore
-                self.__return(getTempData, f"LOG:'{rk}' Regressor test score is : {natifScore}", natifScore)
+                self.__return(getTempData, "LOG:test score is : {natifScore}", natifScore)
                 
-                self.__return(getTempData, f"LOG:'{rk}' Regressor test scoring starts ...")
+                #self.__return(getTempData, f"LOG:'{rk}' Regressor test scoring starts ...")
                 testMetricsResDict = OrderedDict()
                 regProps['scoring-test'] = testMetricsResDict
                 for emk in self.__evalMetrics.keys():
@@ -159,10 +159,10 @@ class SupervisedLearner:
                     testMetricsResDict[emk] = testScore
                     self.__return(getTempData, f"SCORE:'{emk}' score getted", testScore)
 
-                self.__return(getTempData, f"LOG:'{rk}' Regressor test scoring ended")
+                self.__return(getTempData, "LOG:Regressor test scoring completed")
 
                 if trainMetrics:
-                    self.__return(getTempData, f"LOG:'{rk}' Regressor train scoring starts ...")
+                    #self.__return(getTempData, f"LOG:'{rk}' Regressor train scoring starts ...")
                     yTrainPred = regressor.predict(xTrain)
                     trainMetricsResDict = OrderedDict()
                     regProps['scoring-train'] = trainMetricsResDict
@@ -172,7 +172,7 @@ class SupervisedLearner:
                         testScore = em(yTrain, yTrainPred)
 
                         trainMetricsResDict[emk] = testScore
-                    self.__return(getTempData, f"LOG:'{rk}' Regressor train scoring ended")
+                    self.__return(getTempData, "LOG:Regressor train scoring ended")
             self.__return(getTempData, "LOG:Training process ended")
         return res
 
