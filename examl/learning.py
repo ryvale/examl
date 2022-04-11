@@ -102,14 +102,14 @@ class SupervisedLearner:
         for imDF in imDFs:
             xTrain, yTrain = self.__prepareForLearning(imDF.df, targetCol)
 
-            self.__return(getTempData, f"LOG:Additional data processing ({imDF.name}) starts ...")
+            #self.__return(getTempData, f"LOG:Additional data processing ({imDF.name}) starts ...")
             tDF = testDF.copy()
             tDF = imDF.processor.execute(tDF)
             xTest, yTest = self.__prepareForLearning(tDF, targetCol)
 
             
             procProps = OrderedDict()
-            self.__return(getTempData, "LOG:Additional data processing ended")
+            #self.__return(getTempData, "LOG:Additional data processing ended")
 
             self.__return(getTempData, imDF.name + "_xTrain", xTrain)
             self.__return(getTempData, imDF.name + "_yTrain", yTrain)
@@ -146,7 +146,7 @@ class SupervisedLearner:
                 #self.__return(getTempData, f"LOG:Getting '{rk}' Regressor test score ...")
                 natifScore = regressor.score(xTest, yTest)
                 regProps['natif-test-score'] = natifScore
-                self.__return(getTempData, "LOG:test score is : {natifScore}", natifScore)
+                self.__return(getTempData, f"LOG:test score is : {natifScore}", natifScore)
                 
                 #self.__return(getTempData, f"LOG:'{rk}' Regressor test scoring starts ...")
                 testMetricsResDict = OrderedDict()
