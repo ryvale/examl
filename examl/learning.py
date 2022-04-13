@@ -58,6 +58,11 @@ class XLSFileInputMan(InputMan):
 
         return pd.concat(sheetDataArray, ignore_index=True)
 
+def defaultPrepareForOperation(df : pd.DataFrame, targetCol : str):
+    x = df.drop(targetCol, axis = 1)
+    y = df[targetCol]
+
+    return x, y
 class SupervisedLearner:
 
     def __init__(self, dataProcessors : Mapping[str, DataProcessor], regressors : Mapping[str, Callable[[], object]], evalMetrics : Mapping[str, Callable[[object, object], object]]):
@@ -65,7 +70,7 @@ class SupervisedLearner:
         self.__regressors = regressors
         self.__evalMetrics = evalMetrics
 
-    def __prepareForLearning(self, df : pd.DataFrame, targetCol : str):
+    def __prepareForLearning(self, df : DataFrame, targetCol : str):
         x = df.drop(targetCol, axis = 1)
         y = df[targetCol]
 
@@ -102,20 +107,14 @@ class SupervisedLearner:
         for imDF in imDFs:
             xTrain, yTrain = self.__prepareForLearning(imDF.df, targetCol)
 
-            #self.__return(getTempData, f"LOG:Additional data processing ({imDF.name}) starts ...")
             tDF = testDF.copy()
             tDF = imDF.processor.execute(tDF)
             xTest, yTest = self.__prepareForLearning(tDF, targetCol)
 
             
             procProps = OrderedDict()
-            #self.__return(getTempData, "LOG:Additional data processing ended")
 
-            self.__return(getTempData, imDF.name + "_xTrain", xTrain)
-            self.__return(getTempData, imDF.name + "_yTrain", yTrain)
-
-            self.__return(getTempData, imDF.name + "_xTest", xTest)
-            self.__return(getTempData, imDF.name + "_yTest", yTest)
+            self.__return(getTempData, imDF.name + "_X_Y_TRAIN_TEST", (xTrain, yTrain, xTest, yTest))
 
             processors[imDF.name] = procProps
 
