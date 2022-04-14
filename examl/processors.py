@@ -19,9 +19,21 @@ class AggConfig:
 
 
 class DataProcessor:
+
+    def fit(self, df: DataFrame):
+        pass
     
     def execute(self, df: DataFrame) -> DataFrame:
         return df
+
+class StandardizableDataProcessor(DataProcessor):
+
+    def __init__(self, standardizer):
+        self.__standardizer = standardizer
+
+    def fit(self, df: DataFrame):
+        self.__standardizer.fit(df)
+
 
 class StandardDataProcessor(DataProcessor):
 

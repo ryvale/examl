@@ -107,6 +107,9 @@ class SupervisedLearner:
         for imDF in imDFs:
             xTrain, yTrain = self.__prepareForLearning(imDF.df, targetCol)
 
+            imDF.processor.fit(xTrain)
+
+
             tDF = testDF.copy()
             tDF = imDF.processor.execute(tDF)
             xTest, yTest = self.__prepareForLearning(tDF, targetCol)
