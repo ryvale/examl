@@ -28,12 +28,14 @@ class DataProcessor:
 
 class StandardizableDataProcessor(DataProcessor):
 
-    def __init__(self, standardizer):
-        self.__standardizer = standardizer
+    def __init__(self, standardizers : Iterable[object]):
+        self.__standardizers = standardizers
+
+
 
     def fit(self, df: DataFrame):
-        self.__standardizer.fit(df)
-
+        for s in self.__standardizers:
+            s.fit(df)
 
 class StandardDataProcessor(DataProcessor):
 
