@@ -31,11 +31,25 @@ class StandardizableDataProcessor(DataProcessor):
     def __init__(self, standardizers : Iterable[object]):
         self.__standardizers = standardizers
 
-
-
     def fit(self, df: DataFrame):
         for s in self.__standardizers:
             s.fit(df)
+
+class SequentialDataProcessor(DataProcessor):
+
+    def __init__(self, processors : Sequence[DataProcessor]):
+        self.__processors = processors
+
+    def fit(self, df: DataFrame):
+        for p in self.__processors:
+            p.fit(df)
+
+    def execute(self, df: DataFrame) -> DataFrame:
+        proccesedDF = df
+        for p in self.__processors:
+            proccesedDF = p.execute(proccesedDF)
+
+        return proccesedDF
 
 class StandardDataProcessor(DataProcessor):
 
