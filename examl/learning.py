@@ -183,7 +183,10 @@ class SupervisedLearner:
         
         key0 = next( iter(processors.keys()))
 
-        regKey0 = next(iter(processors[key0]['regressors'].keys()))
+        try:
+            regKey0 = next(iter(processors[key0]['regressors'].keys()))
+        except StopIteration:
+            return None
 
         nbReg = len(processors[key0]['regressors'])
         oneReg = processors[key0]['regressors'][regKey0]
@@ -235,6 +238,8 @@ class SupervisedLearner:
         for ip in  knowledgeCollection.keys():
             knowledge = knowledgeCollection[ip]
             knowledgeParams = self.__learningReportParams(knowledge)
+
+            if knowledgeParams is None : continue
 
             initProcs += [ip for i in range(len(knowledgeParams[0]))]
             procs += knowledgeParams[0]

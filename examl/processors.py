@@ -56,8 +56,14 @@ class StandardDataProcessor(DataProcessor):
         if not self.__newColumns is None:
             for nc in self.__newColumns.keys():
                 ncConfig = self.__newColumns[nc]
-                ncProc = ncConfig['func']
-                df[nc] = ncProc(df)
+
+                if 'func' in ncConfig.keys():
+                    ncProc = ncConfig['func']
+                    df[nc] = ncProc(df)
+
+                if 'apply' in ncConfig.keys():
+                    ncApplyProc = ncConfig['apply']
+                    df[nc] = df.apply(lambda l : ncApplyProc(df, l), axis=1)
 
                 if 'drop' in ncConfig.keys():
                     df.drop(ncConfig['drop'], axis=1, inplace=True)
