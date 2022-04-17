@@ -1,5 +1,6 @@
 from typing import Callable, Mapping, OrderedDict, Sequence, Dict, Iterable
 import pandas as pd
+import numpy as np
 from pandas import DataFrame
 
 class AggConfig:
@@ -163,4 +164,39 @@ class StandardDataProcessor(DataProcessor):
 
         return df
 
-
+class ForwardDataProcessor(DataProcessor):
+    
+    def __init__(self, targetField : str, epochField : str, mainFields, nextEpoch : Callable[[object], object], newTargetColName : str = None, preprocessor : DataProcessor = None, dropTargetNa : bool = True):
+        self.__targetField = targetField
+        self.__mainFields = mainFields
+        self.__epochField = epochField
+        self.__preprocessor = preprocessor
+        self.__newTargetColName = (targetField + '_future') if newTargetColName is None else newTargetColName
+        self.__nextEpoch = nextEpoch
+        self.__dropTargetNa = dropTargetNa
+    
+    def __futureTargetValue(self, df : DataFrame, r):
+        condition = (df[self.__epochField] == self.__nextEpoch(r[self.__epochField]))
+        
+        for f in self.__mainFields:
+            condition &= (df[f] == r[f])
+            
+        v0 = df[condition][self.__targetField]
+        
+        return np.nan if len(v0.values) == 0 else v0.values[0]
+        
+    
+    def fit(self, df: DataFrame):
+        if self.__preprocessor is None : return
+        
+        self.__preprocessor.fit(df)
+        
+        
+    def execute(self, df: DataFrame) -> DataFrame:
+        if not self.__preprocessor is None : df = self.__preprocessor.execute(df)
+        
+        df[self.__newTargetColName] = df.apply(lambda r : self.__futureTargetValue(df, r), axis = 1)
+        
+        if self.__dropTargetNa: df = df[df[self.__newTargetColName].notna()]
+        
+        return df
