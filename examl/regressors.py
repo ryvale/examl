@@ -42,22 +42,22 @@ class StandardizableRegressor:
         self.__standardizer = standardizer
 
 
-    def __normalizeDF(self, df : DataFrame):
+    def normalizeDF(self, df : DataFrame):
         return self.__standardizer.transform(df)
 
 
     def fit(self, xDF, YDF):
-        stdDF = self.__normalizeDF(xDF)
+        stdDF = self.normalizeDF(xDF)
         
         self.__regressor.fit(stdDF, YDF)
 
     def predict(self, xDF):
-        stdDF = self.__normalizeDF(xDF)
+        stdDF = self.normalizeDF(xDF)
         
         return self.__regressor.predict(stdDF)
 
     def score(self, x, y, sample_weight=None):
-        stdDF = self.__normalizeDF(x)
+        stdDF = self.normalizeDF(x)
 
         return self.__regressor.score(stdDF, y, sample_weight = sample_weight)
 
