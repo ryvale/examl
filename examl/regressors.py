@@ -61,6 +61,9 @@ class StandardizableRegressor:
 
         return self.__regressor.score(stdDF, y, sample_weight = sample_weight)
 
+    def get_params(self, deep : bool = True):
+        return self.__regressor.get_params(deep)
+
     def __get_estimator(self):
         return self.__regressor
 
