@@ -60,3 +60,8 @@ class StandardizableRegressor:
         stdDF = self.__normalizeDF(x)
 
         return self.__regressor.score(stdDF, y, sample_weight = sample_weight)
+
+    def __get_estimator(self):
+        return self.__regressor
+
+    estimator = property(__get_estimator)
