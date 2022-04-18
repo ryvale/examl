@@ -35,6 +35,19 @@ class PolynomialRegressor:
         polyFeatures = self.__poly.fit_transform(tmpDF)
         return self.__regressor.score(polyFeatures, y, sample_weight = sample_weight)
 
+    def get_params(self, deep : bool = True):
+        return self.__regressor.get_params(deep)
+
+    def set_params(self, **params):
+        self.__regressor.set_params(params)
+
+        return self
+
+    def __get_estimator(self):
+        return self.__regressor
+
+    estimator = property(__get_estimator)
+
 
 class StandardizableRegressor:
     def __init__(self, regressor : Callable[[], object], standardizer):
@@ -63,6 +76,12 @@ class StandardizableRegressor:
 
     def get_params(self, deep : bool = True):
         return self.__regressor.get_params(deep)
+
+
+    def set_params(self, **params):
+        self.__regressor.set_params(params)
+
+        return self
 
     def __get_estimator(self):
         return self.__regressor
