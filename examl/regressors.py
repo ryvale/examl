@@ -64,4 +64,9 @@ class StandardizableRegressor:
     def __get_estimator(self):
         return self.__regressor
 
+    def __get_standardizer(self):
+        return self.__standardizer
+
     estimator = property(__get_estimator)
+
+    standardizer = property(__get_standardizer)
